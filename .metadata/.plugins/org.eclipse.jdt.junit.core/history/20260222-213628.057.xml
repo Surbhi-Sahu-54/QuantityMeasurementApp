@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="QuantityMeasurementAppTest" project="QuantityMeasurementapp" tests="5" started="5" failures="0" errors="0" ignored="0">
+  <testsuite name="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.062" displayname="QuantityMeasurementAppTest" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]">
+    <testcase name="testEquality_SameValue" classname="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.042" displayname="testEquality_SameValue()" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]/[method:testEquality_SameValue()]"/>
+    <testcase name="testEquality_DifferentValue" classname="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.005" displayname="testEquality_DifferentValue()" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]/[method:testEquality_DifferentValue()]"/>
+    <testcase name="testEquality_SameReference" classname="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.001" displayname="testEquality_SameReference()" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]/[method:testEquality_SameReference()]"/>
+    <testcase name="testEquality_NullComparison" classname="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.002" displayname="testEquality_NullComparison()" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]/[method:testEquality_NullComparison()]"/>
+    <testcase name="testEquality_DifferentType" classname="com.apps.quantitymeasurement.QuantityMeasurementAppTest" time="0.002" displayname="testEquality_DifferentType()" uniqueid="[engine:junit-jupiter]/[class:com.apps.quantitymeasurement.QuantityMeasurementAppTest]/[method:testEquality_DifferentType()]"/>
+  </testsuite>
+</testrun>
