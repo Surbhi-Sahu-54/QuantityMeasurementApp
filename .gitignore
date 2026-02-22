@@ -1,2 +1,7 @@
 .metadata/
 QuantityMeasurementapp/target/
+.metadata/
+target/
+.classpath
+.project
+.settings/
