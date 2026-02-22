@@ -1,0 +1,10 @@
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# Maven target folder
+target/
+
+# OS files
+.DS_Store
