@@ -1,4 +1,5 @@
 .metadata/
+<<<<<<< HEAD
 
 # Eclipse files
 .classpath
@@ -10,3 +11,11 @@ target/
 
 # OS files
 .DS_Store
+=======
+QuantityMeasurementapp/target/
+.metadata/
+target/
+.classpath
+.project
+.settings/
+>>>>>>> feature/UC3-GenericLength
