@@ -2,76 +2,141 @@ package com.apps.quantitymeasurement;
 
 public class Length {
 
-    private final double value;
-    private final LengthUnit unit;
+	  private final double value;
+	    private final LengthUnit unit;
 
-    // Constructor
-    public Length(double value, LengthUnit unit) {
+	    private static final double EPSILON = 0.00001;
 
-        if (unit == null) {
-            throw new IllegalArgumentException("Unit cannot be null");
-        }
+	    public Length(double value, LengthUnit unit) {
+	        if (unit == null) {
+	            throw new IllegalArgumentException("Unit cannot be null");
+	        }
+	        if (!Double.isFinite(value)) {
+	            throw new IllegalArgumentException("Value must be finite");
+	        }
+	        this.value = value;
+	        this.unit = unit;
+	    }
 
-        this.value = value;
-        this.unit = unit;
-    }
+	    public double getValue() {
+	        return value;
+	    }
 
-    // Getter for value
-    public double getValue() {
-        return value;
-    }
+	    public LengthUnit getUnit() {
+	        return unit;
+	    }
 
-    // Getter for unit
-    public LengthUnit getUnit() {
-        return unit;
-    }
+	    // ----------------------------
+	    // Strict comparison
+	    // ----------------------------
+	    public boolean compare(Length that) {
+	        if (that == null) {
+	            return false;
+	        }
 
-    // Convert to inches (base unit)
-    private double toInches() {
-        return this.value * this.unit.getConversionFactor();
-    }
+	        double thisBase = this.unit.convertToBaseUnit(this.value);
+	        double thatBase = that.unit.convertToBaseUnit(that.value);
 
-    // Addition method
-    public Length add(Length other, LengthUnit targetUnit) {
+	        return Double.compare(thisBase, thatBase) == 0;
+	    }
 
-        if (other == null || targetUnit == null) {
-            throw new IllegalArgumentException("Other length or target unit cannot be null");
-        }
+	    // ----------------------------
+	    // equals with tolerance
+	    // ----------------------------
+	    @Override
+	    public boolean equals(Object o) {
+	        if (this == o) return true;
+	        if (!(o instanceof Length)) return false;
 
-        double thisInches = this.toInches();
-        double otherInches = other.toInches();
+	        Length that = (Length) o;
 
-        double sumInches = thisInches + otherInches;
+	        double thisBase = this.unit.convertToBaseUnit(this.value);
+	        double thatBase = that.unit.convertToBaseUnit(that.value);
 
-        double resultValue = sumInches / targetUnit.getConversionFactor();
+	        return Math.abs(thisBase - thatBase) < EPSILON;
+	    }
 
-        return new Length(resultValue, targetUnit);
-    }
+	    @Override
+	    public int hashCode() {
+	        double baseValue = unit.convertToBaseUnit(value);
+	        return Double.hashCode(baseValue);
+	    }
 
-    // Equals method
-    @Override
-    public boolean equals(Object obj) {
+	    // ----------------------------
+	    // UC5 – Conversion
+	    // ----------------------------
+	    public Length convertTo(LengthUnit targetUnit) {
+	        if (targetUnit == null) {
+	            throw new IllegalArgumentException("Target unit cannot be null");
+	        }
 
-        if (this == obj)
-            return true;
+	        double baseValue = this.unit.convertToBaseUnit(this.value);
+	        double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
 
-        if (obj == null || getClass() != obj.getClass())
-            return false;
+	        return new Length(convertedValue, targetUnit);
+	    }
 
-        Length other = (Length) obj;
+	    // ----------------------------
+	    // UC6 – Implicit Target
+	    // ----------------------------
+	    public Length add(Length that) {
+	        if (that == null) {
+	            throw new IllegalArgumentException("Operand cannot be null");
+	        }
+	        return add(that, this.unit);
+	    }
 
-        return Double.compare(this.toInches(), other.toInches()) == 0;
-    }
+	    // ----------------------------
+	    // UC7 – Explicit Target
+	    // ----------------------------
+	    public Length add(Length that, LengthUnit targetUnit) {
+	        if (that == null || targetUnit == null) {
+	            throw new IllegalArgumentException("Operand and target unit cannot be null");
+	        }
 
-    // HashCode
-    @Override
-    public int hashCode() {
-        return Double.hashCode(toInches());
-    }
+	        if (!Double.isFinite(that.value)) {
+	            throw new IllegalArgumentException("Measurement values must be finite");
+	        }
 
-    // toString
-    @Override
-    public String toString() {
-        return value + " " + unit;
-    }
-}
+	        return addAndConvert(that, targetUnit);
+	    }
+
+	    /**
+	     * Private utility method to centralize addition logic.
+	     */
+	    private Length addAndConvert(Length that, LengthUnit targetUnit) {
+
+	        double sumInBase =
+	                this.unit.convertToBaseUnit(this.value) +
+	                that.unit.convertToBaseUnit(that.value);
+
+	        double finalValue = targetUnit.convertFromBaseUnit(sumInBase);
+
+	        return new Length(finalValue, targetUnit);
+	    }
+
+	    @Override
+	    public String toString() {
+	        return String.format("%.2f %s", value, unit);
+	    }
+
+	    // Standalone test
+	    public static void main(String[] args) {
+
+	        Length l1 = new Length(1.0, LengthUnit.FEET);
+	        Length l2 = new Length(12.0, LengthUnit.INCHES);
+
+	        System.out.println("Are lengths equal? " + l1.equals(l2));
+
+	        Length l3 = new Length(1, LengthUnit.YARDS);
+	        Length l4 = new Length(36, LengthUnit.INCHES);
+	        System.out.println("Are lengths equal? " + l3.equals(l4));
+
+	        Length l5 = new Length(100, LengthUnit.CENTIMETERS);
+	        Length l6 = new Length(39.3701, LengthUnit.INCHES);
+	        System.out.println("Are lengths equal? " + l5.equals(l6));
+
+	        System.out.println("Result in YARDS: " + l1.add(l2, LengthUnit.YARDS));
+	        System.out.println("Result in INCHES: " + l1.add(l2, LengthUnit.INCHES));
+	    }
+	}
