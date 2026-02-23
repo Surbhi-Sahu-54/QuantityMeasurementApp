@@ -5,61 +5,73 @@ public class Length {
     private final double value;
     private final LengthUnit unit;
 
-    public enum LengthUnit {
-
-        FEET(12.0),
-        INCHES(1.0);
-
-        private final double conversionFactor;
-
-        LengthUnit(double conversionFactor) {
-            this.conversionFactor = conversionFactor;
-        }
-
-        public double getConversionFactor() {
-            return conversionFactor;
-        }
-    }
-
+    // Constructor
     public Length(double value, LengthUnit unit) {
+
         if (unit == null) {
             throw new IllegalArgumentException("Unit cannot be null");
         }
+
         this.value = value;
         this.unit = unit;
     }
 
-    private double convertToBaseUnit() {
+    // Getter for value
+    public double getValue() {
+        return value;
+    }
+
+    // Getter for unit
+    public LengthUnit getUnit() {
+        return unit;
+    }
+
+    // Convert to inches (base unit)
+    private double toInches() {
         return this.value * this.unit.getConversionFactor();
     }
 
-    @Override
-    public boolean equals(Object o) {
+    // Addition method
+    public Length add(Length other, LengthUnit targetUnit) {
 
-        if (this == o)
+        if (other == null || targetUnit == null) {
+            throw new IllegalArgumentException("Other length or target unit cannot be null");
+        }
+
+        double thisInches = this.toInches();
+        double otherInches = other.toInches();
+
+        double sumInches = thisInches + otherInches;
+
+        double resultValue = sumInches / targetUnit.getConversionFactor();
+
+        return new Length(resultValue, targetUnit);
+    }
+
+    // Equals method
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj)
             return true;
 
-        if (!(o instanceof Length))
+        if (obj == null || getClass() != obj.getClass())
             return false;
 
-        Length that = (Length) o;
+        Length other = (Length) obj;
 
-        return Double.compare(
-                this.convertToBaseUnit(),
-                that.convertToBaseUnit()
-        ) == 0;
+        return Double.compare(this.toInches(), other.toInches()) == 0;
     }
 
+    // HashCode
     @Override
     public int hashCode() {
-        return Double.hashCode(convertToBaseUnit());
+        return Double.hashCode(toInches());
     }
 
-    public static void main(String[] args) {
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        System.out.println("Are lengths equal ? " + l1.equals(l2));
+    // toString
+    @Override
+    public String toString() {
+        return value + " " + unit;
     }
-
 }
