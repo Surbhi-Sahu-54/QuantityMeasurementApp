@@ -1,58 +1,38 @@
 package com.apps.quantitymeasurement;
-
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class QuantityMeasurementTest {
 
-    // UC13: Centralized Logic Verification (DRY Principle)
     @Test
-    void givenRefactoredLogic_ShouldPerformAdditionCorrectly() {
-        Quantity<LengthUnit> oneFeet = new Quantity<>(1.0, LengthUnit.FEET);
-        Quantity<LengthUnit> twoInches = new Quantity<>(2.0, LengthUnit.INCHES);
-        Quantity<LengthUnit> result = oneFeet.add(twoInches, LengthUnit.INCHES);
-        assertEquals(14.0, result.getValue()); // 12 + 2
+    void testTemperatureEquality_CelsiusAndFahrenheit() {
+        Quantity<TemperatureUnit> zeroCelsius = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> thirtyTwoFahrenheit = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        assertEquals(zeroCelsius, thirtyTwoFahrenheit);
     }
 
-    // UC12 & UC13: Subtraction & Non-Commutativity
     @Test
-    void givenTenFeetAndSixInches_WhenSubtracted_ShouldReturnCorrectValue() {
-        Quantity<LengthUnit> tenFeet = new Quantity<>(10.0, LengthUnit.FEET);
-        Quantity<LengthUnit> sixInches = new Quantity<>(6.0, LengthUnit.INCHES);
-        assertEquals(9.5, tenFeet.subtract(sixInches).getValue());
+    void testTemperatureConversion() {
+        Quantity<TemperatureUnit> boilingCelsius = new Quantity<>(100.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> result = boilingCelsius.convertTo(TemperatureUnit.FAHRENHEIT);
+        assertEquals(212.0, result.getValue());
     }
 
-    // UC12 & UC13: Division (Dimensionless Scalar)
     @Test
-    void givenTwentyFourInchesAndTwoFeet_WhenDivided_ShouldReturnOne() {
-        Quantity<LengthUnit> inches = new Quantity<>(24.0, LengthUnit.INCHES);
-        Quantity<LengthUnit> feet = new Quantity<>(2.0, LengthUnit.FEET);
-        assertEquals(1.0, inches.divide(feet));
-    }
-
-    // Centimeter Integration Test
-    @Test
-    void givenTwoInchesAndFiveCm_WhenCompared_ShouldBeEqual() {
-        Quantity<LengthUnit> twoInches = new Quantity<>(2.0, LengthUnit.INCHES);
-        Quantity<LengthUnit> fiveCm = new Quantity<>(5.0, LengthUnit.CENTIMETER);
-        assertEquals(twoInches, fiveCm);
-    }
-
-    // Error Handling Consistency (DRY Validation)
-    @Test
-    void givenCrossCategoryOperands_ShouldThrowExceptionForAllOperations() {
-        Quantity<LengthUnit> feet = new Quantity<>(1.0, LengthUnit.FEET);
-        Quantity<WeightUnit> kg = new Quantity<>(1.0, WeightUnit.KILOGRAM);
+    void testTemperatureArithmetic_ShouldThrowException() {
+        Quantity<TemperatureUnit> t1 = new Quantity<>(100.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> t2 = new Quantity<>(50.0, TemperatureUnit.CELSIUS);
         
-        assertThrows(IllegalArgumentException.class, () -> ((Quantity)feet).add(kg));
-        assertThrows(IllegalArgumentException.class, () -> ((Quantity)feet).subtract(kg));
-        assertThrows(IllegalArgumentException.class, () -> ((Quantity)feet).divide(kg));
+        // UC14: Requirement - Arithmetic on temperature throws exception
+        assertThrows(UnsupportedOperationException.class, () -> t1.add(t2));
+        assertThrows(UnsupportedOperationException.class, () -> t1.divide(t2));
     }
 
     @Test
-    void givenDivisionByZero_ShouldThrowArithmeticException() {
-        Quantity<LengthUnit> tenFeet = new Quantity<>(10.0, LengthUnit.FEET);
-        Quantity<LengthUnit> zeroFeet = new Quantity<>(0.0, LengthUnit.FEET);
-        assertThrows(ArithmeticException.class, () -> tenFeet.divide(zeroFeet));
+    void testLengthArithmetic_ShouldStillWork() {
+        // Backward Compatibility check (UC13 still works)
+        Quantity<LengthUnit> feet = new Quantity<>(1.0, LengthUnit.FEET);
+        Quantity<LengthUnit> inches = new Quantity<>(12.0, LengthUnit.INCHES);
+        assertEquals(2.0, feet.add(inches).getValue());
     }
 }

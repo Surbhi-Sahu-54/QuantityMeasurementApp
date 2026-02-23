@@ -1,9 +1,12 @@
+package com.apps.quantitymeasurement;
+
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LengthTest {
+class LengthTest {
 
-	 // UC1 - Same reference
+    // UC1 - Same reference
     @Test
     void shouldReturnTrueWhenSameReference() {
         Length length = new Length(1, LengthUnit.FEET);

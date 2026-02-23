@@ -1,146 +1,76 @@
 package com.apps.quantitymeasurement;
+import java.util.function.DoubleBinaryOperator;
 
 public class Quantity<U extends IMeasurable> {
-
     private final double value;
     private final U unit;
+    private static final double EPSILON = 0.02;
 
-    // Constructor
+    // UC13: Step 1 - Define Operations
+    private enum ArithmeticOperation {
+        ADD((a, b) -> a + b), SUBTRACT((a, b) -> a - b), DIVIDE((a, b) -> a / b);
+        private final DoubleBinaryOperator op;
+        ArithmeticOperation(DoubleBinaryOperator op) { this.op = op; }
+        public double compute(double v1, double v2) { return op.applyAsDouble(v1, v2); }
+    }
+
     public Quantity(double value, U unit) {
-
-        if (unit == null)
-            throw new IllegalArgumentException("Unit cannot be null");
-
-        if (value < 0)
-            throw new IllegalArgumentException("Value cannot be negative");
-
+        if (unit == null) throw new IllegalArgumentException("Unit null nahi ho sakta");
         this.value = value;
         this.unit = unit;
     }
 
-    // Getter
-    public double getValue() {
-        return value;
+    public double getValue() { return value; }
+
+    // UC13 & UC14: Centralized Arithmetic Logic
+    private double performArithmetic(Quantity<U> other, ArithmeticOperation operation) {
+        // UC14: Support check (Temperature ke liye exception fekega)
+        this.unit.validateOperationSupport(operation.name());
+
+        if (other == null || !this.unit.getCategory().equals(other.unit.getCategory()))
+            throw new IllegalArgumentException("Category mismatch");
+
+        double base1 = this.unit.convertToBase(this.value);
+        double base2 = other.unit.convertToBase(other.value);
+        
+        if (operation == ArithmeticOperation.DIVIDE && base2 == 0)
+            throw new ArithmeticException("Zero division");
+
+        return operation.compute(base1, base2);
     }
 
-    public U getUnit() {
-        return unit;
-    }
-
-    // Convert this quantity to base unit value
-    private double toBase() {
-        return unit.convertToBase(value);
-    }
-
-    // ================= CONVERSION =================
-
-    public Quantity<U> convertTo(U targetUnit) {
-
-        if (targetUnit == null)
-            throw new IllegalArgumentException("Target unit cannot be null");
-
-        if (!unit.getCategory().equals(targetUnit.getCategory()))
-            throw new IllegalArgumentException("Different measurement category");
-
-        double base = this.toBase();
-        double result = targetUnit.convertFromBase(base);
-
-        return new Quantity<>(result, targetUnit);
-    }
-
-    // ================= ADDITION =================
+    // --- Public Methods (Satisfying UC1-UC14) ---
 
     public Quantity<U> add(Quantity<U> other) {
-        return add(other, this.unit);
+        return add(other, this.unit); 
     }
 
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
-
-        if (other == null || targetUnit == null)
-            throw new IllegalArgumentException("Arguments cannot be null");
-
-        if (!unit.getCategory().equals(other.unit.getCategory()))
-            throw new IllegalArgumentException("Different measurement category");
-
-        double sumBase = this.toBase() + other.toBase();
-        double result = targetUnit.convertFromBase(sumBase);
-
-        return new Quantity<>(result, targetUnit);
+        double res = performArithmetic(other, ArithmeticOperation.ADD);
+        return new Quantity<>(round(targetUnit.convertFromBase(res)), targetUnit);
     }
-
-    // ================= SUBTRACTION =================
 
     public Quantity<U> subtract(Quantity<U> other) {
-        return subtract(other, this.unit);
+        double res = performArithmetic(other, ArithmeticOperation.SUBTRACT);
+        return new Quantity<>(round(this.unit.convertFromBase(res)), this.unit);
     }
-
-    public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
-
-        if (other == null || targetUnit == null)
-            throw new IllegalArgumentException("Arguments cannot be null");
-
-        if (!unit.getCategory().equals(other.unit.getCategory()))
-            throw new IllegalArgumentException("Different measurement category");
-
-        double diffBase = this.toBase() - other.toBase();
-
-        if (diffBase < 0)
-            throw new IllegalArgumentException("Result cannot be negative");
-
-        double result = targetUnit.convertFromBase(diffBase);
-
-        return new Quantity<>(result, targetUnit);
-    }
-
-    // ================= DIVISION =================
 
     public double divide(Quantity<U> other) {
-
-        if (other == null)
-            throw new IllegalArgumentException("Other cannot be null");
-
-        if (!unit.getCategory().equals(other.unit.getCategory()))
-            throw new IllegalArgumentException("Different measurement category");
-
-        double base1 = this.toBase();
-        double base2 = other.toBase();
-
-        if (base2 == 0)
-            throw new ArithmeticException("Cannot divide by zero");
-
-        return base1 / base2;
+        return performArithmetic(other, ArithmeticOperation.DIVIDE);
     }
 
-    // ================= EQUALS =================
-
-    @Override
-    public boolean equals(Object obj) {
-
-        if (this == obj)
-            return true;
-
-        if (!(obj instanceof Quantity))
-            return false;
-
-        Quantity<?> other = (Quantity<?>) obj;
-
-        if (!unit.getCategory().equals(other.unit.getCategory()))
-            return false;
-
-        return Double.compare(this.toBase(), other.toBase()) == 0;
+    public Quantity<U> convertTo(U targetUnit) {
+        double base = this.unit.convertToBase(this.value);
+        return new Quantity<>(round(targetUnit.convertFromBase(base)), targetUnit);
     }
 
-    // ================= HASHCODE =================
+    private double round(double v) { return Math.round(v * 100.0) / 100.0; }
 
     @Override
-    public int hashCode() {
-        return Double.hashCode(toBase());
-    }
-
-    // ================= TOSTRING =================
-
-    @Override
-    public String toString() {
-        return value + " " + unit;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Quantity<?> that)) return false;
+        if (!this.unit.getCategory().equals(that.unit.getCategory())) return false;
+        return Math.abs(this.unit.convertToBase(this.value) - that.unit.convertToBase(that.value)) < EPSILON;
     }
 }

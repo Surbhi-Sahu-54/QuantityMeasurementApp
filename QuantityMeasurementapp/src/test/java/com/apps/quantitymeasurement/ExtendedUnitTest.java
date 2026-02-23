@@ -1,4 +1,5 @@
 package com.apps.quantitymeasurement;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +23,7 @@ public class ExtendedUnitTest {
 
     @Test
     void testEquality_CentimetersToInches_EquivalentValue() {
-        Length l1 = new Length(2.54, LengthUnit.CENTIMETERS);
+        Length l1 = new Length(2.54, LengthUnit.CENTIMETER);
         Length l2 = new Length(1.0, LengthUnit.INCHES);
 
         assertTrue(l1.equals(l2));
@@ -49,14 +50,14 @@ public class ExtendedUnitTest {
 
     @Test
     void testEquality_CentimetersSameReference() {
-        Length l1 = new Length(1.0, LengthUnit.CENTIMETERS);
+        Length l1 = new Length(1.0, LengthUnit.CENTIMETER);
 
         assertTrue(l1.equals(l1));
     }
 
     @Test
     void testEquality_CentimetersNullComparison() {
-        Length l1 = new Length(1.0, LengthUnit.CENTIMETERS);
+        Length l1 = new Length(1.0, LengthUnit.CENTIMETER);
 
         assertFalse(l1.equals(null));
     }
