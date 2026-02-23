@@ -2,41 +2,37 @@ package com.apps.quantitymeasurement;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class QuantityMeasurementAppTest {
-	@Test
-    void testEquality_SameValue() {
-        Feet f1 = new Feet(1.0);
-        Feet f2 = new Feet(1.0);
+class QuantityMeasurementAppTest {
 
-        assertTrue(f1.equals(f2));
+    @Test
+    void givenValidLengthConversion_ShouldReturnCorrectValue() {
+        // UC10: Create a generic Quantity object and use convertTo
+        Quantity<LengthUnit> feetQuantity = new Quantity<>(1.0, LengthUnit.FEET);
+        Quantity<LengthUnit> result = feetQuantity.convertTo(LengthUnit.INCHES);
+
+        assertEquals(12.0, result.getValue(), 0.001);
     }
 
     @Test
-    void testEquality_DifferentValue() {
-        Feet f1 = new Feet(1.0);
-        Feet f2 = new Feet(2.0);
+    void givenValidWeightConversion_ShouldReturnCorrectValue() {
+        // UC10: Works identically for Weight using the same Quantity class
+        Quantity<WeightUnit> kgQuantity = new Quantity<>(1.0, WeightUnit.KILOGRAM);
+        Quantity<WeightUnit> result = kgQuantity.convertTo(WeightUnit.GRAM);
 
-        assertFalse(f1.equals(f2));
+        assertEquals(1000.0, result.getValue(), 0.001);
     }
 
     @Test
-    void testEquality_NullComparison() {
-        Feet f1 = new Feet(1.0);
-
-        assertFalse(f1.equals(null));
+    void givenNullUnit_ShouldThrowException() {
+        // UC10: Constructor handles null validation
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(1.0, null));
     }
 
     @Test
-    void testEquality_SameReference() {
-        Feet f1 = new Feet(1.0);
-
-        assertTrue(f1.equals(f1));
-    }
-
-    @Test
-    void testEquality_DifferentType() {
-        Feet f1 = new Feet(1.0);
-
-        assertFalse(f1.equals("1.0"));
+    void givenNaNValue_ShouldThrowException() {
+        // UC10: Constructor handles finite value validation
+        assertThrows(IllegalArgumentException.class,
+                () -> new Quantity<>(Double.NaN, LengthUnit.FEET));
     }
 }
