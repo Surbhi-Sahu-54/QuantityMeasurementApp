@@ -1,83 +1,47 @@
 package com.apps.quantitymeasurement;
-import java.util.Objects;
-
 
 public class QuantityWeight {
-	private final double value;
-	private final WeightUnit unit;
-	private static final double EPSILON = 1e-6;
 
-	public QuantityWeight(double value, WeightUnit unit) {
-		if (unit == null)
-			throw new IllegalArgumentException("Unit cannot be null");
+    private final double value;
+    private final WeightUnit unit;
 
-		if (!Double.isFinite(value))
-			throw new IllegalArgumentException("Value must be finite");
+    public QuantityWeight(double value, WeightUnit unit) {
 
-		this.value = value;
-		this.unit = unit;
-	}
+        if (unit == null)
+            throw new IllegalArgumentException("Unit cannot be null");
 
-	public double getValue() {
-		return value;
-	}
+        this.value = value;
+        this.unit = unit;
+    }
 
-	public WeightUnit getUnit() {
-		return unit;
-	}
+    public double getValue() {
+        return value;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
+    public WeightUnit getUnit() {
+        return unit;
+    }
 
-		if (obj == null || getClass() != obj.getClass())
-			return false;
+    public QuantityWeight convertTo(WeightUnit targetUnit) {
 
-		QuantityWeight that = (QuantityWeight) obj;
+        double base =
+                unit.convertToBaseUnit(value);
 
-		double thisBase = this.unit.convertToBase(this.value);
-		double thatBase = that.unit.convertToBase(that.value);
+        double result =
+                targetUnit.convertFromBaseUnit(base);
 
-		return Math.abs(thisBase - thatBase) < EPSILON;
-	}
+        return new QuantityWeight(result, targetUnit);
+    }
 
-	@Override
-	public int hashCode() {
-		double baseValue = unit.convertToBase(value);
-		return Objects.hash(Math.round(baseValue / EPSILON));
-	}
+    public QuantityWeight add(QuantityWeight other, WeightUnit targetUnit) {
 
-	public QuantityWeight convertTo(WeightUnit targetUnit) {
-		if (targetUnit == null)
-			throw new IllegalArgumentException("Target unit cannot be null");
+        double sumBase =
+                this.unit.convertToBaseUnit(this.value)
+                        + other.unit.convertToBaseUnit(other.value);
 
-		double baseValue = unit.convertToBase(value);
-		double convertedValue = targetUnit.convertFromBase(baseValue);
+        double result =
+                targetUnit.convertFromBaseUnit(sumBase);
 
-		return new QuantityWeight(convertedValue, targetUnit);
-	}
-
-	// Implicit target (first operand unit)
-	public QuantityWeight add(QuantityWeight other) {
-		return add(other, this.unit);
-	}
-
-	// Explicit target
-	public QuantityWeight add(QuantityWeight other, WeightUnit targetUnit) {
-		if (other == null || targetUnit == null)
-			throw new IllegalArgumentException("Arguments cannot be null");
-
-		double sumBase = this.unit.convertToBase(this.value) + other.unit.convertToBase(other.value);
-
-		double finalValue = targetUnit.convertFromBase(sumBase);
-
-		return new QuantityWeight(finalValue, targetUnit);
-	}
-
-	@Override
-	public String toString() {
-		return String.format("%.6f %s", value, unit);
-	}
+        return new QuantityWeight(result, targetUnit);
+    }
 }
-

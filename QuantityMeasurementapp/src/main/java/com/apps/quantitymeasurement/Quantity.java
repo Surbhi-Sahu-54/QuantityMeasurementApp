@@ -1,6 +1,6 @@
 package com.apps.quantitymeasurement;
 
-public class Quantity<U extends Enum<U>> {
+public class Quantity<U extends IMeasurable> {
 
     private final double value;
     private final U unit;
@@ -10,8 +10,8 @@ public class Quantity<U extends Enum<U>> {
         if (unit == null)
             throw new IllegalArgumentException("Unit cannot be null");
 
-        if (Double.isNaN(value))
-            throw new IllegalArgumentException("Value cannot be NaN");
+        if (value < 0)
+            throw new IllegalArgumentException("Value cannot be negative");
 
         this.value = value;
         this.unit = unit;
@@ -25,19 +25,8 @@ public class Quantity<U extends Enum<U>> {
         return unit;
     }
 
-    private double getConversionFactor(U unit) {
-
-        if (unit instanceof LengthUnit)
-            return ((LengthUnit) unit).getConversionFactor();
-
-        if (unit instanceof WeightUnit)
-            return ((WeightUnit) unit).getConversionFactor();
-
-        throw new IllegalArgumentException("Unsupported unit type");
-    }
-
     private double toBase() {
-        return value * getConversionFactor(unit);
+        return unit.convertToBase(value);
     }
 
     public Quantity<U> convertTo(U targetUnit) {
@@ -46,8 +35,7 @@ public class Quantity<U extends Enum<U>> {
             throw new IllegalArgumentException("Target unit cannot be null");
 
         double baseValue = toBase();
-
-        double result = baseValue / getConversionFactor(targetUnit);
+        double result = targetUnit.convertFromBase(baseValue);
 
         return new Quantity<>(result, targetUnit);
     }
@@ -55,14 +43,14 @@ public class Quantity<U extends Enum<U>> {
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
         if (other == null || targetUnit == null)
-            throw new IllegalArgumentException("Invalid input");
+            throw new IllegalArgumentException("Arguments cannot be null");
 
-        if (!unit.getClass().equals(other.unit.getClass()))
-            throw new IllegalArgumentException("Different unit categories");
+        double sumBase =
+                this.toBase() +
+                other.toBase();
 
-        double sumBase = this.toBase() + other.toBase();
-
-        double result = sumBase / getConversionFactor(targetUnit);
+        double result =
+                targetUnit.convertFromBase(sumBase);
 
         return new Quantity<>(result, targetUnit);
     }
@@ -78,11 +66,10 @@ public class Quantity<U extends Enum<U>> {
 
         Quantity<?> other = (Quantity<?>) obj;
 
-        if (!unit.getClass().equals(other.unit.getClass()))
+        if (!unit.getCategory().equals(other.unit.getCategory()))
             return false;
 
-        return Double.compare(this.toBase(),
-                ((Quantity<?>) other).toBase()) == 0;
+        return Double.compare(this.toBase(), other.toBase()) == 0;
     }
 
     @Override

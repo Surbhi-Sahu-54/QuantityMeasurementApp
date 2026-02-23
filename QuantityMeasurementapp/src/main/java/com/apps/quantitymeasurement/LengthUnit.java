@@ -1,56 +1,32 @@
 package com.apps.quantitymeasurement;
 
-public enum LengthUnit {
+public enum LengthUnit implements IMeasurable {
 
-	  // Base unit = FEET
-    FEET(1.0),
-    INCHES(1.0 / 12.0),
-    YARDS(3.0),
-    CENTIMETERS(1.0 / 30.48);
+    FEET(12.0, "LENGTH"),
+    INCHES(1.0, "LENGTH"),
+    YARDS(36.0, "LENGTH"),
+    CENTIMETER(0.393701, "LENGTH");
 
     private final double conversionFactor;
+    private final String category;
 
-    /**
-     * conversionFactor represents:
-     * How much of FEET equals 1 unit of this type.
-     */
-    LengthUnit(double conversionFactor) {
+    LengthUnit(double conversionFactor, String category) {
         this.conversionFactor = conversionFactor;
+        this.category = category;
     }
 
-    public double getConversionFactor() {
-        return conversionFactor;
-    }
-
-    /**
-     * Responsibility 1:
-     * Convert value in this unit to the base unit (FEET).
-     */
-    public double convertToBaseUnit(double value) {
+    @Override
+    public double convertToBase(double value) {
         return value * conversionFactor;
     }
 
-    /**
-     * Responsibility 2:
-     * Convert base unit value (FEET) back to this unit.
-     */
-    public double convertFromBaseUnit(double baseValue) {
+    @Override
+    public double convertFromBase(double baseValue) {
         return baseValue / conversionFactor;
     }
 
-    /**
-     * Responsibility 3:
-     * Direct conversion from this unit to target unit.
-     */
-    public double convert(double value, LengthUnit targetUnit) {
-        if (targetUnit == null) {
-            throw new IllegalArgumentException("Target unit cannot be null");
-        }
-
-        // Step 1: Convert to base unit (FEET)
-        double baseValue = convertToBaseUnit(value);
-
-        // Step 2: Convert base unit to target unit
-        return targetUnit.convertFromBaseUnit(baseValue);
+    @Override
+    public String getCategory() {
+        return category;
     }
 }
