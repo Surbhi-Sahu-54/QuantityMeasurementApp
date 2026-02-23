@@ -19,3 +19,13 @@ target/
 .project
 .settings/
 >>>>>>> feature/UC3-GenericLength
+# Eclipse files
+.classpath
+.project
+.settings/
+
+# Maven target folder
+target/
+
+# OS files
+.DS_Store
