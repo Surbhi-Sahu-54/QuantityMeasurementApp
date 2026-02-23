@@ -1,19 +1,17 @@
 package com.apps.quantitymeasurement;
 
-import java.util.Objects;
-
 public class Length {
 
     private final double value;
     private final LengthUnit unit;
+    private static final double EPSILON = 0.0001;
 
-    private static final double EPSILON = 1e-6;
-
-    // Constructor
     public Length(double value, LengthUnit unit) {
-
         if (unit == null)
             throw new IllegalArgumentException("Unit cannot be null");
+
+        if (value < 0)
+            throw new IllegalArgumentException("Value cannot be negative");
 
         this.value = value;
         this.unit = unit;
@@ -27,50 +25,39 @@ public class Length {
         return unit;
     }
 
-    // Convert this length to base unit (inches)
     private double toBase() {
-        return unit.convertToBaseUnit(value);
+        return unit.convertToBase(value);
     }
 
-    // Convert to target unit
     public Length convertTo(LengthUnit targetUnit) {
 
         if (targetUnit == null)
             throw new IllegalArgumentException("Target unit cannot be null");
 
-        double baseValue = this.toBase();
-
-        double convertedValue =
-                targetUnit.convertFromBaseUnit(baseValue);
-
-        return new Length(convertedValue, targetUnit);
-    }
-
-    // Add using same unit as current object
-    public Length add(Length other) {
-
-        if (other == null)
-            throw new IllegalArgumentException("Other cannot be null");
-
-        return add(other, this.unit);
-    }
-
-    // Add with target unit
-    public Length add(Length other, LengthUnit targetUnit) {
-
-        if (other == null || targetUnit == null)
-            throw new IllegalArgumentException("Arguments cannot be null");
-
-        double sumBase =
-                this.toBase() + other.toBase();
-
-        double result =
-                targetUnit.convertFromBaseUnit(sumBase);
+        double base = unit.convertToBase(value);
+        double result = targetUnit.convertFromBase(base);
 
         return new Length(result, targetUnit);
     }
 
-    // Equals
+    public Length add(Length other) {
+        return add(other, this.unit);
+    }
+
+    public Length add(Length other, LengthUnit targetUnit) {
+
+        if (other == null || targetUnit == null)
+            throw new IllegalArgumentException("Invalid input");
+
+        double sumBase =
+                this.unit.convertToBase(this.value)
+                        + other.unit.convertToBase(other.value);
+
+        double result = targetUnit.convertFromBase(sumBase);
+
+        return new Length(result, targetUnit);
+    }
+
     @Override
     public boolean equals(Object obj) {
 
@@ -87,26 +74,6 @@ public class Length {
 
     @Override
     public int hashCode() {
-        return Objects.hash(toBase());
+        return Double.hashCode(toBase());
     }
-
-    @Override
-    public String toString() {
-        return value + " " + unit;
-    }
-
-
-    // MAIN TEST
-    public static void main(String[] args) {
-
-        Length l1 = new Length(1.0, LengthUnit.FEET);
-        Length l2 = new Length(12.0, LengthUnit.INCHES);
-
-        System.out.println("Equal: " + l1.equals(l2));
-
-        Length result = l1.add(l2, LengthUnit.YARDS);
-
-        System.out.println("Result in yards: " + result);
-    }
-
 }

@@ -1,5 +1,3 @@
-package com.apps.quantitymeasurement;
-
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,7 +72,7 @@ public class LengthTest {
     @Test
     void shouldAddFeetAndCentimeter() {
         Length l1 = new Length(1, LengthUnit.FEET);
-        Length l2 = new Length(30.48, LengthUnit.CENTIMETERS);
+        Length l2 = new Length(30.48, LengthUnit.CENTIMETER);
 
         Length result = l1.add(l2);
 
