@@ -6,6 +6,8 @@
 UC3 – Generic Quantity Class (Applying DRY Principle)
 
 ---
+**(19-feb-20026)**
+---
 
 ### Overview
 UC3 refactors the Quantity Measurement App to eliminate code duplication introduced in UC1 and UC2.
@@ -139,4 +141,5 @@ Adding a new unit requires only adding a new enum constant — no changes to equ
 📌 Repository Updates
 Committed and pushed the UC3 implementation to the repository.
 Code:[UC2-InchEquality](https://github.com/Surbhi-Sahu-54/QuantityMeasurementApp/tree/feature/UC2-InchEquality)
+
 
