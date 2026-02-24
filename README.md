@@ -92,4 +92,6 @@ A better design would involve:
 - Centralizing equality logic in one reusable implementation. This would improve scalability and maintainability for future unit conversions.
 📌 Repository Updates
 Committed and pushed the UC2 implementation to the repository.
+
 Code:[UC2 – Feet and Inches Measurement Equality](https://github.com/Surbhi-Sahu-54/QuantityMeasurementApp/blob/feature/UC2-InchEquality/README.md)
+
