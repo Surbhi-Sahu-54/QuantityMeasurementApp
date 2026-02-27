@@ -92,10 +92,10 @@ UC5 introduces conversion-focused test cases in addition to equality tests.
 These tests validate correctness, symmetry, and robustness.
 
 ### Backward Compatibility
-UC1: Feet equality
-UC2: Feet & Inches equality
-UC3: Generic Quantity model
-UC4: Extended units (yards, centimeters)
+- UC1: Feet equality
+- UC2: Feet & Inches equality
+- UC3: Generic Quantity model
+- UC4: Extended units (yards, centimeters)
 
 No existing functionality is broken in UC5.
 
@@ -108,3 +108,4 @@ No existing functionality is broken in UC5.
 Committed and pushed the UC-5 implementation to the repository.
 
 Code Link:[UC5-Unit Conversion](https://github.com/Surbhi-Sahu-54/QuantityMeasurementApp/tree/feature/UC5-UnitConversion)
+
