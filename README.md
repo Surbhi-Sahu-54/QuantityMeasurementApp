@@ -2,7 +2,7 @@
 ---
 ### UC9 – Weight Measurement Equality, Conversion, and Addition
 (Kilogram, Gram, Pound)
-**(Date: 18 Feb 2026)**
+**(Date: 24 Feb 2026)**
 
 ---
 ### Overview
@@ -173,4 +173,5 @@ This implementation lays the foundation for future enhancements and domain expan
 Committed and pushed the UC9 implementation to the repository.
 
 Code Link:[UC9-WeightMeasurement](https://github.com/Surbhi-Sahu-54/QuantityMeasurementApp/tree/feature/UC9-WeightMeasurement)
+
 
