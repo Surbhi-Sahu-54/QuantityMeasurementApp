@@ -1,7 +1,7 @@
 ### Quantity Measurement App
 ---
 ### UC12 – Subtraction and Division Operations on Quantity Measurements
-**(Date: 23 Feb 2026)**
+**(Date: 25 Feb 2026)**
 
 ---
 ### Description
@@ -250,3 +250,4 @@ The Quantity Measurement App is now:
 - Committed and pushed the UC-12 implementation to the repository.
 
 Code Link: -[UC-12Quantity Substraction and Division](https://github.com/Surbhi-Sahu-54/QuantityMeasurementApp/tree/feature/UC12--QuantitySubtractionandDivision)
+
