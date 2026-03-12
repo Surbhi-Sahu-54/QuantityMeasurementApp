@@ -1,4 +1,5 @@
 package com.apps.quantitymeasurement;
+//import com.apps.quantitymeasurement.Length.LengthUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
@@ -68,13 +69,13 @@ public class LengthAdditionTest {
 
 	@Test
 	void testAddition_CrossUnit_CentimeterPlusInch() {
-		Length l1 = new Length(2.54, LengthUnit.CENTIMETER);
-		Length l2 = new Length(1.0, LengthUnit.INCHES);
+	    Length l1 = new Length(2.54, LengthUnit.CENTIMETERS);
+	    Length l2 = new Length(1.0, LengthUnit.INCHES);
 
-		Length result = l1.add(l2);
+	    Length result = l1.add(l2);
 
-		assertEquals(5.08, result.getValue(), EPSILON);
-		assertEquals(LengthUnit.CENTIMETER, result.getUnit());
+	    assertEquals(5.08, result.getValue(), EPSILON);
+	    assertEquals(LengthUnit.CENTIMETERS, result.getUnit());
 	}
 
 	// Commutativity
