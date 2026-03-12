@@ -52,7 +52,7 @@ class QuantityTest {
 
     @Test
     void givenCentimeterAndInches_WhenEquivalent_ShouldReturnTrue() {
-        Quantity<LengthUnit> l1 = new Quantity<>(100, LengthUnit.CENTIMETER);
+        Quantity<LengthUnit> l1 = new Quantity<>(100, LengthUnit.CENTIMETERS);
         Quantity<LengthUnit> l2 = new Quantity<>(39.3701, LengthUnit.INCHES);
 
         assertTrue(l1.equals(l2));
