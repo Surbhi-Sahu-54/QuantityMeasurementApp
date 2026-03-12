@@ -5,7 +5,7 @@ public enum LengthUnit implements IMeasurable {
     FEET(12.0, "LENGTH"),
     INCHES(1.0, "LENGTH"),
     YARDS(36.0, "LENGTH"),
-    CENTIMETER(0.393701, "LENGTH");
+    CENTIMETERS(0.393701, "LENGTH");
 
     private final double conversionFactor;
     private final String category;
