@@ -68,9 +68,22 @@ public class Quantity<U extends IMeasurable> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Quantity<?> that)) return false;
-        if (!this.unit.getCategory().equals(that.unit.getCategory())) return false;
-        return Math.abs(this.unit.convertToBase(this.value) - that.unit.convertToBase(that.value)) < EPSILON;
-    }
+
+        if (this == o)
+            return true;
+
+        if (!(o instanceof Quantity<?>))
+            return false;
+
+        Quantity<?> that = (Quantity<?>) o;
+
+        if (!this.unit.getCategory().equals(that.unit.getCategory()))
+            return false;
+
+        return Math.abs(
+                this.unit.convertToBase(this.value) -
+                that.unit.convertToBase(that.value)
+        ) < EPSILON;
+   
+       }
 }
