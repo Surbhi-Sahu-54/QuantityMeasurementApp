@@ -1,26 +1,27 @@
 package com.apps.quantitymeasurement;
 
+import com.apps.quantitymeasurement.controller.QuantityMeasurementController;
+import com.apps.quantitymeasurement.dto.QuantityDTO;
+import com.apps.quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+import com.apps.quantitymeasurement.service.QuantityMeasurementServiceImpl;
+
 public class QuantityMeasurementApp {
 
     public static void main(String[] args) {
-        System.out.println("=== Quantity Measurement App  ===");
 
-        // Length Subtraction
-        Quantity<LengthUnit> tenFeet = new Quantity<>(10.0, LengthUnit.FEET);
-        Quantity<LengthUnit> sixInches = new Quantity<>(6.0, LengthUnit.INCHES);
-        System.out.println("Subtraction (10ft - 6in): " + tenFeet.subtract(sixInches));
+        QuantityMeasurementCacheRepository repository =
+                QuantityMeasurementCacheRepository.getInstance();
 
-        // Weight Division (Fixing Line 30 Error)
-        Quantity<WeightUnit> tenKg = new Quantity<>(10.0, WeightUnit.KILOGRAM);
-        Quantity<WeightUnit> fiveKg = new Quantity<>(5.0, WeightUnit.KILOGRAM);
-        
-        // Note: result is a DOUBLE, not a Quantity
-        double ratio = tenKg.divide(fiveKg); 
-        System.out.println("Division Ratio (10kg / 5kg): " + ratio);
+        QuantityMeasurementServiceImpl service =
+                new QuantityMeasurementServiceImpl(repository);
 
-        // Volume Zero Check
-        Quantity<VolumeUnit> oneLitre = new Quantity<>(1.0, VolumeUnit.LITRE);
-        Quantity<VolumeUnit> thousandMl = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
-        System.out.println("Zero Result (1L - 1000mL): " + oneLitre.subtract(thousandMl));
+        QuantityMeasurementController controller =
+                new QuantityMeasurementController(service);
+
+        QuantityDTO q1 = new QuantityDTO(10, "FEET", "LENGTH");
+        QuantityDTO q2 = new QuantityDTO(10, "FEET", "LENGTH");
+
+        controller.performEquality(q1, q2);
+        controller.performAddition(q1, q2);
     }
 }
