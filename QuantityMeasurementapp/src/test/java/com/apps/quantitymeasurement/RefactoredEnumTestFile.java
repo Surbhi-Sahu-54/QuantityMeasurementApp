@@ -54,7 +54,7 @@ public class RefactoredEnumTestFile {
 	// Quantity(2.54, CENTIMETERS).convertTo(INCHES)
 	@Test
 	public void givenCentimeters_whenConvertToInches_shouldReturn1Inch() {
-		Length cm = new Length(2.54, LengthUnit.CENTIMETER);
+		Length cm = new Length(2.54, LengthUnit.CENTIMETERS);
 		Length result = cm.convertTo(LengthUnit.INCHES);
 
 		assertEquals(1.0, result.getValue(), EPSILON);
