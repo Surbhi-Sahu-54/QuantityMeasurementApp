@@ -23,7 +23,7 @@ public class ExtendedUnitTest {
 
     @Test
     void testEquality_CentimetersToInches_EquivalentValue() {
-        Length l1 = new Length(2.54, LengthUnit.CENTIMETER);
+        Length l1 = new Length(2.54, LengthUnit.CENTIMETERS);
         Length l2 = new Length(1.0, LengthUnit.INCHES);
 
         assertTrue(l1.equals(l2));
@@ -50,14 +50,14 @@ public class ExtendedUnitTest {
 
     @Test
     void testEquality_CentimetersSameReference() {
-        Length l1 = new Length(1.0, LengthUnit.CENTIMETER);
+        Length l1 = new Length(1.0, LengthUnit.CENTIMETERS);
 
         assertTrue(l1.equals(l1));
     }
 
     @Test
     void testEquality_CentimetersNullComparison() {
-        Length l1 = new Length(1.0, LengthUnit.CENTIMETER);
+        Length l1 = new Length(1.0, LengthUnit.CENTIMETERS);
 
         assertFalse(l1.equals(null));
     }
