@@ -1,30 +1,44 @@
 package com.apps.quantitymeasurement;
 
 public enum WeightUnit implements IMeasurable {
+    GRAM(1.0),
+    KILOGRAM(1000.0),
+    POUND(453.59237),
+    OUNCE(28.349523125);
 
-    KILOGRAM(1000.0, "WEIGHT"),
-    GRAM(1.0, "WEIGHT");
+    private final double conversionFactorToGrams;
 
-    private final double conversionFactor;
-    private final String category;
-
-    WeightUnit(double conversionFactor, String category) {
-        this.conversionFactor = conversionFactor;
-        this.category = category;
+    WeightUnit(double conversionFactorToGrams) {
+        this.conversionFactorToGrams = conversionFactorToGrams;
     }
 
     @Override
-    public double convertToBase(double value) {
-        return value * conversionFactor;
+    public double toBase(double value) {
+        return value * conversionFactorToGrams;
     }
 
     @Override
-    public double convertFromBase(double baseValue) {
-        return baseValue / conversionFactor;
+    public double fromBase(double baseValue) {
+        return baseValue / conversionFactorToGrams;
     }
 
     @Override
-    public String getCategory() {
-        return category;
+    public String getMeasurementType() {
+        return "WEIGHT";
+    }
+
+    @Override
+    public String getUnitName() {
+        return name();
+    }
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName) {
+        for (WeightUnit unit : WeightUnit.values()) {
+            if (unit.getUnitName().equalsIgnoreCase(unitName)) {
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid weight unit: " + unitName);
     }
 }
