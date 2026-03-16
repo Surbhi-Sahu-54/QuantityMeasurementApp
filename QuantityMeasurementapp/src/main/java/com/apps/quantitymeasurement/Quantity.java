@@ -1,89 +1,133 @@
 package com.apps.quantitymeasurement;
 import java.util.function.DoubleBinaryOperator;
 
-public class Quantity<U extends IMeasurable> {
+public final class Quantity<U extends IMeasurable> {
+
+    private static final double EPSILON = 1e-6;
+
     private final double value;
     private final U unit;
-    private static final double EPSILON = 0.02;
-
-    // UC13: Step 1 - Define Operations
-    private enum ArithmeticOperation {
-        ADD((a, b) -> a + b), SUBTRACT((a, b) -> a - b), DIVIDE((a, b) -> a / b);
-        private final DoubleBinaryOperator op;
-        ArithmeticOperation(DoubleBinaryOperator op) { this.op = op; }
-        public double compute(double v1, double v2) { return op.applyAsDouble(v1, v2); }
-    }
 
     public Quantity(double value, U unit) {
-        if (unit == null) throw new IllegalArgumentException("Unit null nahi ho sakta");
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Value must be finite");
+        }
         this.value = value;
         this.unit = unit;
     }
 
-    public double getValue() { return value; }
-
-    // UC13 & UC14: Centralized Arithmetic Logic
-    private double performArithmetic(Quantity<U> other, ArithmeticOperation operation) {
-        // UC14: Support check (Temperature ke liye exception fekega)
-        this.unit.validateOperationSupport(operation.name());
-
-        if (other == null || !this.unit.getCategory().equals(other.unit.getCategory()))
-            throw new IllegalArgumentException("Category mismatch");
-
-        double base1 = this.unit.convertToBase(this.value);
-        double base2 = other.unit.convertToBase(other.value);
-        
-        if (operation == ArithmeticOperation.DIVIDE && base2 == 0)
-            throw new ArithmeticException("Zero division");
-
-        return operation.compute(base1, base2);
+    public double getValue() {
+        return value;
     }
 
-    // --- Public Methods (Satisfying UC1-UC14) ---
-
-    public Quantity<U> add(Quantity<U> other) {
-        return add(other, this.unit); 
+    public U getUnit() {
+        return unit;
     }
 
-    public Quantity<U> add(Quantity<U> other, U targetUnit) {
-        double res = performArithmetic(other, ArithmeticOperation.ADD);
-        return new Quantity<>(round(targetUnit.convertFromBase(res)), targetUnit);
+    private double toBase() {
+        return unit.toBase(value);
     }
 
-    public Quantity<U> subtract(Quantity<U> other) {
-        double res = performArithmetic(other, ArithmeticOperation.SUBTRACT);
-        return new Quantity<>(round(this.unit.convertFromBase(res)), this.unit);
-    }
-
-    public double divide(Quantity<U> other) {
-        return performArithmetic(other, ArithmeticOperation.DIVIDE);
+    private void validateSameCategory(Quantity<U> other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other quantity cannot be null");
+        }
+        if (!this.unit.getMeasurementType().equals(other.unit.getMeasurementType())) {
+            throw new IllegalArgumentException("Cross-category operation is not allowed");
+        }
     }
 
     public Quantity<U> convertTo(U targetUnit) {
-        double base = this.unit.convertToBase(this.value);
-        return new Quantity<>(round(targetUnit.convertFromBase(base)), targetUnit);
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (!this.unit.getMeasurementType().equals(targetUnit.getMeasurementType())) {
+            throw new IllegalArgumentException("Target unit must belong to same measurement type");
+        }
+        double converted = targetUnit.fromBase(this.toBase());
+        return new Quantity<>(converted, targetUnit);
     }
 
-    private double round(double v) { return Math.round(v * 100.0) / 100.0; }
+    public Quantity<U> add(Quantity<U> other) {
+        validateSameCategory(other);
+        if (!unit.supportsAddition() || !other.unit.supportsAddition()) {
+            throw new UnsupportedOperationException("Addition not supported for this measurement type");
+        }
+        double resultBase = this.toBase() + other.toBase();
+        return new Quantity<>(this.unit.fromBase(resultBase), this.unit);
+    }
+
+    public Quantity<U> add(Quantity<U> other, U targetUnit) {
+        validateSameCategory(other);
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (!unit.supportsAddition() || !other.unit.supportsAddition()) {
+            throw new UnsupportedOperationException("Addition not supported for this measurement type");
+        }
+        double resultBase = this.toBase() + other.toBase();
+        return new Quantity<>(targetUnit.fromBase(resultBase), targetUnit);
+    }
+
+    public Quantity<U> subtract(Quantity<U> other) {
+        validateSameCategory(other);
+        if (!unit.supportsSubtraction() || !other.unit.supportsSubtraction()) {
+            throw new UnsupportedOperationException("Subtraction not supported for this measurement type");
+        }
+        double resultBase = this.toBase() - other.toBase();
+        return new Quantity<>(this.unit.fromBase(resultBase), this.unit);
+    }
+
+    public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+        validateSameCategory(other);
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        if (!unit.supportsSubtraction() || !other.unit.supportsSubtraction()) {
+            throw new UnsupportedOperationException("Subtraction not supported for this measurement type");
+        }
+        double resultBase = this.toBase() - other.toBase();
+        return new Quantity<>(targetUnit.fromBase(resultBase), targetUnit);
+    }
+
+    public double divide(Quantity<U> other) {
+        validateSameCategory(other);
+        if (!unit.supportsDivision() || !other.unit.supportsDivision()) {
+            throw new UnsupportedOperationException("Division not supported for this measurement type");
+        }
+
+        double divisor = other.toBase();
+        if (Math.abs(divisor) < EPSILON) {
+            throw new ArithmeticException("Division by zero is not allowed");
+        }
+
+        return this.toBase() / divisor;
+    }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Quantity<?>)) return false;
 
-        if (this == o)
-            return true;
+        Quantity<?> other = (Quantity<?>) obj;
 
-        if (!(o instanceof Quantity<?>))
+        if (!this.unit.getMeasurementType().equals(other.unit.getMeasurementType())) {
             return false;
+        }
 
-        Quantity<?> that = (Quantity<?>) o;
+        return Math.abs(this.toBase() - other.getUnit().toBase(other.getValue())) < EPSILON;
+    }
 
-        if (!this.unit.getCategory().equals(that.unit.getCategory()))
-            return false;
+    @Override
+    public int hashCode() {
+        return Objects.hash(unit.getMeasurementType(), Math.round(toBase() / EPSILON));
+    }
 
-        return Math.abs(
-                this.unit.convertToBase(this.value) -
-                that.unit.convertToBase(that.value)
-        ) < EPSILON;
-   
-       }
+    @Override
+    public String toString() {
+        return String.format("%.4f %s", value, unit.getUnitName());
+    }
 }
