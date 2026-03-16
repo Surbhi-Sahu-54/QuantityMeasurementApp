@@ -1,31 +1,43 @@
 package com.apps.quantitymeasurement;
 
 public enum VolumeUnit implements IMeasurable {
+    MILLILITRE(1.0),
+    LITRE(1000.0),
+    GALLON(3785.41);
 
-    LITRE(1000.0, "VOLUME"),
-    MILLILITRE(1.0, "VOLUME"),
-    GALLON(3785.41, "VOLUME");
+    private final double conversionFactorToMillilitre;
 
-    private final double conversionFactor;
-    private final String category;
-
-    VolumeUnit(double conversionFactor, String category) {
-        this.conversionFactor = conversionFactor;
-        this.category = category;
+    VolumeUnit(double conversionFactorToMillilitre) {
+        this.conversionFactorToMillilitre = conversionFactorToMillilitre;
     }
 
     @Override
-    public double convertToBase(double value) {
-        return value * conversionFactor;
+    public double toBase(double value) {
+        return value * conversionFactorToMillilitre;
     }
 
     @Override
-    public double convertFromBase(double baseValue) {
-        return baseValue / conversionFactor;
+    public double fromBase(double baseValue) {
+        return baseValue / conversionFactorToMillilitre;
     }
 
     @Override
-    public String getCategory() {
-        return category;
+    public String getMeasurementType() {
+        return "VOLUME";
+    }
+
+    @Override
+    public String getUnitName() {
+        return name();
+    }
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName) {
+        for (VolumeUnit unit : VolumeUnit.values()) {
+            if (unit.getUnitName().equalsIgnoreCase(unitName)) {
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid volume unit: " + unitName);
     }
 }
