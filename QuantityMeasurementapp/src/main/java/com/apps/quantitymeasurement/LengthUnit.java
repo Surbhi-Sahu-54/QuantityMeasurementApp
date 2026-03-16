@@ -1,32 +1,44 @@
 package com.apps.quantitymeasurement;
 
 public enum LengthUnit implements IMeasurable {
+    FEET(12.0),
+    INCHES(1.0),
+    YARDS(36.0),
+    CENTIMETERS(0.393701);
 
-    FEET(12.0, "LENGTH"),
-    INCHES(1.0, "LENGTH"),
-    YARDS(36.0, "LENGTH"),
-    CENTIMETERS(0.393701, "LENGTH");
+    private final double conversionFactorToInches;
 
-    private final double conversionFactor;
-    private final String category;
-
-    LengthUnit(double conversionFactor, String category) {
-        this.conversionFactor = conversionFactor;
-        this.category = category;
+    LengthUnit(double conversionFactorToInches) {
+        this.conversionFactorToInches = conversionFactorToInches;
     }
 
     @Override
-    public double convertToBase(double value) {
-        return value * conversionFactor;
+    public double toBase(double value) {
+        return value * conversionFactorToInches;
     }
 
     @Override
-    public double convertFromBase(double baseValue) {
-        return baseValue / conversionFactor;
+    public double fromBase(double baseValue) {
+        return baseValue / conversionFactorToInches;
     }
 
     @Override
-    public String getCategory() {
-        return category;
+    public String getMeasurementType() {
+        return "LENGTH";
+    }
+
+    @Override
+    public String getUnitName() {
+        return name();
+    }
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName) {
+        for (LengthUnit unit : LengthUnit.values()) {
+            if (unit.getUnitName().equalsIgnoreCase(unitName)) {
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid length unit: " + unitName);
     }
 }
