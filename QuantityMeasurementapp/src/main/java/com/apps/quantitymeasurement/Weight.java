@@ -1,18 +1,21 @@
 package com.apps.quantitymeasurement;
 
+import java.util.Objects;
+
 public class Weight {
+
+    private static final double EPSILON = 1e-6;
 
     private final double value;
     private final WeightUnit unit;
 
     public Weight(double value, WeightUnit unit) {
-
-        if (unit == null)
+        if (unit == null) {
             throw new IllegalArgumentException("Unit cannot be null");
-
-        if (value < 0)
-            throw new IllegalArgumentException("Value cannot be negative");
-
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException("Weight cannot be negative");
+        }
         this.value = value;
         this.unit = unit;
     }
@@ -26,48 +29,43 @@ public class Weight {
     }
 
     private double toBase() {
-        return unit.convertToBase(value);
+        return unit.toBase(value);
     }
 
     public Weight convertTo(WeightUnit targetUnit) {
-
-        double base = unit.convertToBase(value);
-        double result = targetUnit.convertFromBase(base);
-
-        return new Weight(result, targetUnit);
+        if (targetUnit == null) {
+            throw new IllegalArgumentException("Target unit cannot be null");
+        }
+        return new Weight(targetUnit.fromBase(toBase()), targetUnit);
     }
 
     public Weight add(Weight other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other weight cannot be null");
+        }
         return add(other, this.unit);
     }
 
     public Weight add(Weight other, WeightUnit targetUnit) {
+        if (other == null || targetUnit == null) {
+            throw new IllegalArgumentException("Other weight and target unit cannot be null");
+        }
 
-        double sumBase =
-                this.unit.convertToBase(this.value)
-                        + other.unit.convertToBase(other.value);
-
-        double result = targetUnit.convertFromBase(sumBase);
-
-        return new Weight(result, targetUnit);
+        double sumBase = this.toBase() + other.toBase();
+        return new Weight(targetUnit.fromBase(sumBase), targetUnit);
     }
 
     @Override
     public boolean equals(Object obj) {
-
-        if (this == obj)
-            return true;
-
-        if (!(obj instanceof Weight))
-            return false;
+        if (this == obj) return true;
+        if (!(obj instanceof Weight)) return false;
 
         Weight other = (Weight) obj;
-
-        return Double.compare(this.toBase(), other.toBase()) == 0;
+        return Math.abs(this.toBase() - other.toBase()) < EPSILON;
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(toBase());
+        return Objects.hash(Math.round(toBase() / EPSILON));
     }
 }
