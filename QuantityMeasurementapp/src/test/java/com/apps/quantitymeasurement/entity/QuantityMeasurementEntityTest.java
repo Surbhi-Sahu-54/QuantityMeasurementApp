@@ -1,80 +1,97 @@
 package com.apps.quantitymeasurement.entity;
+import org.junit.jupiter.api.Test;
 
-import com.apps.quantitymeasurement.dto.QuantityDTO;
+import java.sql.Timestamp;
 
-public class QuantityMeasurementEntityTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    private String operationType;
-    private QuantityDTO operand1;
-    private QuantityDTO operand2;
-    private QuantityDTO result;
-    private boolean comparisonResult;
-    private double scalarResult;
-    private boolean error;
-    private String errorMessage;
+/**
+ * QuantityMeasurementEntityTest
+ *
+ * Tests the persistence entity used in UC16.
+ */
+class QuantityMeasurementEntityTest {
 
-    // Constructor for comparison result
-    public QuantityMeasurementEntityTest(String operationType, boolean comparisonResult) {
-        this.operationType = operationType;
-        this.comparisonResult = comparisonResult;
-        this.error = false;
+    @Test
+    void testDefaultConstructorAndSetters() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity();
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        entity.setId(1L);
+        entity.setThisValue(1.0);
+        entity.setThisUnit("FEET");
+        entity.setThisMeasurementType("LENGTH");
+        entity.setThatValue(12.0);
+        entity.setThatUnit("INCHES");
+        entity.setThatMeasurementType("LENGTH");
+        entity.setOperation("COMPARE");
+        entity.setResultString("Equal");
+        entity.setCreatedAt(now);
+
+        assertEquals(1L, entity.getId());
+        assertEquals(1.0, entity.getThisValue());
+        assertEquals("FEET", entity.getThisUnit());
+        assertEquals("LENGTH", entity.getThisMeasurementType());
+        assertEquals(12.0, entity.getThatValue());
+        assertEquals("INCHES", entity.getThatUnit());
+        assertEquals("LENGTH", entity.getThatMeasurementType());
+        assertEquals("COMPARE", entity.getOperation());
+        assertEquals("Equal", entity.getResultString());
+        assertEquals(now, entity.getCreatedAt());
     }
 
-    // Constructor for error
-    public QuantityMeasurementEntityTest(String operationType, String errorMessage) {
-        this.operationType = operationType;
-        this.errorMessage = errorMessage;
-        this.error = true;
+    @Test
+    void testUnaryStyleConstructor() {
+        QuantityMeasurementEntity entity =
+                new QuantityMeasurementEntity("CONVERT", 1.0, "FEET", "LENGTH",
+                        12.0, "INCHES", "LENGTH");
+
+        assertEquals("CONVERT", entity.getOperation());
+        assertEquals(1.0, entity.getThisValue());
+        assertEquals("FEET", entity.getThisUnit());
+        assertEquals("LENGTH", entity.getThisMeasurementType());
+        assertEquals(12.0, entity.getThatValue());
+        assertEquals("INCHES", entity.getThatUnit());
+        assertEquals("LENGTH", entity.getThatMeasurementType());
+        assertEquals("12.0", entity.getResultString());
     }
 
-    // Constructor for binary operation result
-    public QuantityMeasurementEntityTest(String operationType, QuantityDTO op1, QuantityDTO op2, QuantityDTO result) {
-        this.operationType = operationType;
-        this.operand1 = op1;
-        this.operand2 = op2;
-        this.result = result;
-        this.error = false;
+    @Test
+    void testBinaryStyleConstructor() {
+        QuantityMeasurementEntity entity =
+                new QuantityMeasurementEntity("ADD", 1.0, "FEET", "LENGTH",
+                        12.0, "INCHES", "LENGTH", "2.0 FEET");
+
+        assertEquals("ADD", entity.getOperation());
+        assertEquals(1.0, entity.getThisValue());
+        assertEquals("FEET", entity.getThisUnit());
+        assertEquals("LENGTH", entity.getThisMeasurementType());
+        assertEquals(12.0, entity.getThatValue());
+        assertEquals("INCHES", entity.getThatUnit());
+        assertEquals("LENGTH", entity.getThatMeasurementType());
+        assertEquals("2.0 FEET", entity.getResultString());
     }
 
-    // Constructor for scalar result (division)
-    public QuantityMeasurementEntityTest(String operationType, QuantityDTO op1, QuantityDTO op2, double scalarResult) {
-        this.operationType = operationType;
-        this.operand1 = op1;
-        this.operand2 = op2;
-        this.scalarResult = scalarResult;
-        this.error = false;
-    }
+    @Test
+    void testToStringShouldContainImportantFields() {
+        QuantityMeasurementEntity entity = new QuantityMeasurementEntity();
+        entity.setId(10L);
+        entity.setThisValue(1.0);
+        entity.setThisUnit("FEET");
+        entity.setThisMeasurementType("LENGTH");
+        entity.setThatValue(12.0);
+        entity.setThatUnit("INCHES");
+        entity.setThatMeasurementType("LENGTH");
+        entity.setOperation("COMPARE");
+        entity.setResultString("Equal");
 
-    // Getters
-    public String getOperationType() {
-        return operationType;
-    }
+        String output = entity.toString();
 
-    public QuantityDTO getOperand1() {
-        return operand1;
-    }
-
-    public QuantityDTO getOperand2() {
-        return operand2;
-    }
-
-    public QuantityDTO getResult() {
-        return result;
-    }
-
-    public boolean getComparisonResult() {
-        return comparisonResult;
-    }
-
-    public double getScalarResult() {
-        return scalarResult;
-    }
-
-    public boolean hasError() {
-        return error;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
+        assertTrue(output.contains("id=10"));
+        assertTrue(output.contains("thisValue=1.0"));
+        assertTrue(output.contains("thisUnit='FEET'"));
+        assertTrue(output.contains("operation='COMPARE'"));
+        assertTrue(output.contains("resultString='Equal'"));
     }
 }

@@ -1,62 +1,90 @@
 package com.apps.quantitymeasurement.controller;
-
-
 import com.apps.quantitymeasurement.dto.QuantityDTO;
-import com.apps.quantitymeasurement.entity.QuantityMeasurementEntity;
 import com.apps.quantitymeasurement.service.IQuantityMeasurementService;
 
+import java.util.List;
+import java.util.logging.Logger;
+import com.apps.quantitymeasurement.dto.QuantityDTO;
+/**
+ * QuantityMeasurementController
+ *
+ * Acts as the entry point between user interaction and the service layer.
+ * Belongs to the Controller Layer in the N-Tier architecture.
+ *
+ * The controller is responsible for receiving input requests from the Application Layer,
+ * performing minimal validation, and delegating all business logic to the Service Layer.
+ * It must contain NO business logic of its own.
+ *
+ * Responsibilities include:
+ * - Accepting QuantityDTO input from application layer
+ * - Forwarding compare/convert requests to the service layer
+ * - Returning standardized responses back to the caller
+ * - Acting as an intermediary between UI/Application and business logic
+ */
 public class QuantityMeasurementController {
 
-    private final IQuantityMeasurementService service;
+    private static final Logger logger = Logger.getLogger(QuantityMeasurementController.class.getName());
 
-    public QuantityMeasurementController(IQuantityMeasurementService service) {
-        if (service == null) {
-            throw new IllegalArgumentException("Service cannot be null");
-        }
-        this.service = service;
+    private final IQuantityMeasurementService quantityMeasurementService;
+
+    public QuantityMeasurementController(IQuantityMeasurementService quantityMeasurementService) {
+        this.quantityMeasurementService = quantityMeasurementService;
+        logger.info("QuantityMeasurementController initialized with service: "
+                + quantityMeasurementService.getClass().getSimpleName());
     }
 
-    public String performEquality(QuantityDTO operand1, QuantityDTO operand2) {
-        return displayResult(service.compare(operand1, operand2));
+    /**
+     * Performs equality comparison between two quantities.
+     *
+     * The controller forwards the request to the service layer
+     * which performs the actual comparison logic.
+     *
+     * @param thisQuantityDTO first quantity
+     * @param thatQuantityDTO second quantity
+     * @return true if both quantities are equal, otherwise false
+     */
+    public boolean performComparison(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO) {
+        return quantityMeasurementService.compare(thisQuantityDTO, thatQuantityDTO);
     }
 
-    public String performConversion(QuantityDTO operand1, String targetUnit) {
-        return displayResult(service.convert(operand1, targetUnit));
+    /**
+     * Performs unit conversion.
+     *
+     * The controller delegates the conversion request
+     * to the service layer.
+     *
+     * @param sourceQuantityDTO source quantity DTO
+     * @param targetUnitDTO target unit DTO
+     * @return converted quantity DTO
+     */
+    public QuantityDTO performConversion(QuantityDTO sourceQuantityDTO, QuantityDTO targetUnitDTO) {
+        return quantityMeasurementService.convert(sourceQuantityDTO, targetUnitDTO);
     }
 
-    public String performAddition(QuantityDTO operand1, QuantityDTO operand2) {
-        return displayResult(service.add(operand1, operand2));
+    /*
+     * Returns saved measurement history.
+     *
+     * @return list of stored measurement records
+     */
+    public List<String> fetchMeasurementHistory() {
+        return quantityMeasurementService.getAllMeasurementHistory();
     }
 
-    public String performAddition(QuantityDTO operand1, QuantityDTO operand2, String targetUnit) {
-        return displayResult(service.add(operand1, operand2, targetUnit));
+    /**
+     * Returns total number of saved measurement records.
+     *
+     * @return total record count
+     */
+    public int fetchMeasurementCount() {
+        return quantityMeasurementService.getMeasurementCount();
     }
 
-    public String performSubtraction(QuantityDTO operand1, QuantityDTO operand2) {
-        return displayResult(service.subtract(operand1, operand2));
-    }
-
-    public String performSubtraction(QuantityDTO operand1, QuantityDTO operand2, String targetUnit) {
-        return displayResult(service.subtract(operand1, operand2, targetUnit));
-    }
-
-    public String performDivision(QuantityDTO operand1, QuantityDTO operand2) {
-        return displayResult(service.divide(operand1, operand2));
-    }
-
-    public String displayResult(QuantityMeasurementEntity entity) {
-        if (entity.hasError()) {
-            return "ERROR -> " + entity.getErrorMessage();
-        }
-
-        if (entity.getComparisonResult() != null) {
-            return "SUCCESS -> " + entity.getComparisonResult();
-        }
-
-        if (entity.getScalarResult() != null) {
-            return "SUCCESS -> " + entity.getScalarResult();
-        }
-
-        return "SUCCESS -> " + entity.getResult();
+    /**
+     * Deletes all measurements.
+     *
+     * Useful for testing and reset scenarios.
+     */
+    public void deleteAllMeasurements() {
+        quantityMeasurementService.deleteAllMeasurements();
     }
 }

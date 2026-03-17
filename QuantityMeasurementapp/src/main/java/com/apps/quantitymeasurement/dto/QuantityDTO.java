@@ -2,15 +2,20 @@ package com.apps.quantitymeasurement.dto;
 
 import java.util.Objects;
 
+/**
+ * QuantityDTO
+ *
+ * Data Transfer Object representing a quantity value with unit and measurement type.
+ */
 public class QuantityDTO {
 
-    private final double value;
-    private final String unit;
-    private final String measurementType;
+    private double value;
+    private String unitName;
+    private String measurementType;
 
-    public QuantityDTO(double value, String unit, String measurementType) {
+    public QuantityDTO(double value, String unitName, String measurementType) {
         this.value = value;
-        this.unit = unit;
+        this.unitName = unitName;
         this.measurementType = measurementType;
     }
 
@@ -18,8 +23,8 @@ public class QuantityDTO {
         return value;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getUnitName() {
+        return unitName;
     }
 
     public String getMeasurementType() {
@@ -28,22 +33,28 @@ public class QuantityDTO {
 
     @Override
     public String toString() {
-        return value + " " + unit + " (" + measurementType + ")";
+        return "QuantityDTO{" +
+                "value=" + value +
+                ", unitName='" + unitName + '\'' +
+                ", measurementType='" + measurementType + '\'' +
+                '}';
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof QuantityDTO)) return false;
-
-        QuantityDTO other = (QuantityDTO) obj;
-        return Double.compare(value, other.value) == 0
-                && Objects.equals(unit, other.unit)
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof QuantityDTO other)) {
+            return false;
+        }
+        return Double.compare(other.value, value) == 0
+                && Objects.equals(unitName, other.unitName)
                 && Objects.equals(measurementType, other.measurementType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, unit, measurementType);
+        return Objects.hash(value, unitName, measurementType);
     }
 }

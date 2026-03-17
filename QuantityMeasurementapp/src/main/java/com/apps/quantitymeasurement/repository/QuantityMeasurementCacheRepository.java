@@ -1,62 +1,65 @@
 package com.apps.quantitymeasurement.repository;
 import com.apps.quantitymeasurement.entity.QuantityMeasurementEntity;
 
-import java.io.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * QuantityMeasurementCacheRepository
+ *
+ * In-memory repository implementation.
+ *
+ * Responsibilities:
+ * - Store measurement entities in memory
+ * - Provide lightweight persistence for non-database mode
+ * - Support repository abstraction for UC16
+ *
+ * Important Note:
+ * This repository is useful for backward compatibility and fast local testing.
+ * Data is lost when the application stops.
+ */
 public class QuantityMeasurementCacheRepository implements IQuantityMeasurementRepository {
 
-    private static final String FILE_NAME = "quantity_measurements_cache.ser";
-    private static QuantityMeasurementCacheRepository instance;
-
-    private final List<QuantityMeasurementEntity> cache;
-
-    private QuantityMeasurementCacheRepository() {
-        this.cache = loadFromDisk();
-    }
-
-    public static synchronized QuantityMeasurementCacheRepository getInstance() {
-        if (instance == null) {
-            instance = new QuantityMeasurementCacheRepository();
-        }
-        return instance;
-    }
+    private final List<QuantityMeasurementEntity> cache = new ArrayList<>();
+    private long idCounter = 1L;
 
     @Override
-    public synchronized void save(QuantityMeasurementEntity entity) {
+    public QuantityMeasurementEntity save(QuantityMeasurementEntity entity) {
+        entity.setId(idCounter++);
+        entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         cache.add(entity);
-        saveToDisk();
+        return entity;
     }
 
     @Override
-    public synchronized List<QuantityMeasurementEntity> getAllMeasurements() {
+    public List<QuantityMeasurementEntity> getAllMeasurements() {
         return new ArrayList<>(cache);
     }
 
     @Override
-    public synchronized void clear() {
+    public List<QuantityMeasurementEntity> getMeasurementsByOperation(String operation) {
+        return cache.stream()
+                .filter(entity -> operation.equalsIgnoreCase(entity.getOperation()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<QuantityMeasurementEntity> getMeasurementsByType(String measurementType) {
+        return cache.stream()
+                .filter(entity -> measurementType.equalsIgnoreCase(entity.getThisMeasurementType()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getTotalCount() {
+        return cache.size();
+    }
+
+    @Override
+    public void deleteAll() {
         cache.clear();
-        saveToDisk();
-    }
-
-    private void saveToDisk() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
-            oos.writeObject(cache);
-        } catch (IOException ignored) {
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<QuantityMeasurementEntity> loadFromDisk() {
-        File file = new File(FILE_NAME);
-        if (!file.exists()) {
-            return new ArrayList<>();
-        }
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
-            return (List<QuantityMeasurementEntity>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            return new ArrayList<>();
-        }
+        idCounter = 1L;
     }
 }

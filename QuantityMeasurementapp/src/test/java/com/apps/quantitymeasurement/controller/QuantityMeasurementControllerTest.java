@@ -1,204 +1,44 @@
 package com.apps.quantitymeasurement.controller;
-
 import com.apps.quantitymeasurement.dto.QuantityDTO;
-import com.apps.quantitymeasurement.entity.QuantityMeasurementEntity;
-import com.apps.quantitymeasurement.repository.IQuantityMeasurementRepository;
 import com.apps.quantitymeasurement.repository.QuantityMeasurementCacheRepository;
-import com.apps.quantitymeasurement.service.IQuantityMeasurementService;
 import com.apps.quantitymeasurement.service.QuantityMeasurementServiceImpl;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+/**
+ * QuantityMeasurementControllerTest
+ *
+ * Verifies that controller properly delegates to service layer.
+ */
+public class QuantityMeasurementControllerTest {
 
-class QuantityMeasurementControllerTest {
-
-    private IQuantityMeasurementRepository repository;
-    private IQuantityMeasurementService service;
     private QuantityMeasurementController controller;
 
     @BeforeEach
-    void setUp() {
-        repository = QuantityMeasurementCacheRepository.getInstance();
-        repository.clear();
-        service = new QuantityMeasurementServiceImpl(repository);
-        controller = new QuantityMeasurementController(service);
-    }
-
-    @Test
-    void testController_DemonstrateEquality_Success() {
-
-        String result = controller.performEquality(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                new QuantityDTO(12.0, "INCHES", "LENGTH")
+    public void setUp() {
+        controller = new QuantityMeasurementController(
+                new QuantityMeasurementServiceImpl(new QuantityMeasurementCacheRepository())
         );
-
-        assertTrue(result.startsWith("SUCCESS"));
     }
 
     @Test
-    void testController_DemonstrateConversion_Success() {
+    public void testPerformComparison_ShouldReturnTrue() {
+        QuantityDTO dto1 = new QuantityDTO(1.0, "FEET", "LengthUnit");
+        QuantityDTO dto2 = new QuantityDTO(12.0, "INCH", "LengthUnit");
 
-        String result = controller.performConversion(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                "INCHES"
-        );
+        boolean result = controller.performComparison(dto1, dto2);
 
-        assertTrue(result.startsWith("SUCCESS"));
+        Assertions.assertTrue(result);
     }
 
     @Test
-    void testController_DemonstrateAddition_Success() {
+    public void testPerformConversion_ShouldReturnConvertedDTO() {
+        QuantityDTO source = new QuantityDTO(1.0, "FEET", "LengthUnit");
+        QuantityDTO target = new QuantityDTO(0.0, "INCH", "LengthUnit");
 
-        String result = controller.performAddition(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                new QuantityDTO(12.0, "INCHES", "LENGTH")
-        );
+        QuantityDTO result = controller.performConversion(source, target);
 
-        assertTrue(result.startsWith("SUCCESS"));
-    }
-
-    @Test
-    void testController_DemonstrateAddition_Error() {
-
-        String result = controller.performAddition(
-                new QuantityDTO(0.0, "CELSIUS", "TEMPERATURE"),
-                new QuantityDTO(32.0, "FAHRENHEIT", "TEMPERATURE")
-        );
-
-        assertTrue(result.startsWith("ERROR"));
-    }
-
-    @Test
-    void testController_DisplayResult_Success() {
-
-        QuantityMeasurementEntity entity =
-                new QuantityMeasurementEntity(
-                        "COMPARE",
-                        new QuantityDTO(1.0, "FEET", "LENGTH"),
-                        new QuantityDTO(12.0, "INCHES", "LENGTH"),
-                        true
-                );
-
-        String result = controller.displayResult(entity);
-
-        assertTrue(result.startsWith("SUCCESS"));
-    }
-
-    @Test
-    void testController_DisplayResult_Error() {
-
-        QuantityMeasurementEntity entity =
-                new QuantityMeasurementEntity(
-                        "ADD",
-                        new QuantityDTO(0.0, "CELSIUS", "TEMPERATURE"),
-                        "Unsupported operation"
-                );
-
-        String result = controller.displayResult(entity);
-
-        assertTrue(result.startsWith("ERROR"));
-    }
-
-    @Test
-    void testController_AllOperations() {
-
-        assertNotNull(controller.performEquality(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                new QuantityDTO(12.0, "INCHES", "LENGTH")));
-
-        assertNotNull(controller.performConversion(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                "INCHES"));
-
-        assertNotNull(controller.performAddition(
-                new QuantityDTO(1.0, "FEET", "LENGTH"),
-                new QuantityDTO(12.0, "INCHES", "LENGTH")));
-
-        assertNotNull(controller.performSubtraction(
-                new QuantityDTO(10.0, "FEET", "LENGTH"),
-                new QuantityDTO(6.0, "INCHES", "LENGTH")));
-
-        assertNotNull(controller.performDivision(
-                new QuantityDTO(10.0, "KILOGRAM", "WEIGHT"),
-                new QuantityDTO(5.0, "KILOGRAM", "WEIGHT")));
-    }
-
-    @Test
-    void testController_NullService_Prevention() {
-
-        assertThrows(IllegalArgumentException.class,
-                () -> new QuantityMeasurementController(null));
-    }
-
-    @Test
-    void testLayerDecoupling_ControllerIndependence() {
-
-        IQuantityMeasurementService fakeService = new IQuantityMeasurementService() {
-
-            @Override
-            public QuantityMeasurementEntity compare(QuantityDTO o1, QuantityDTO o2) {
-                return new QuantityMeasurementEntity("COMPARE", o1, o2, true);
-            }
-
-            @Override
-            public QuantityMeasurementEntity convert(QuantityDTO o1, String targetUnit) {
-                return new QuantityMeasurementEntity(
-                        "CONVERT",
-                        o1,
-                        new QuantityDTO(1, targetUnit, o1.getMeasurementType())
-                );
-            }
-
-            @Override
-            public QuantityMeasurementEntity add(QuantityDTO o1, QuantityDTO o2) {
-                return new QuantityMeasurementEntity(
-                        "ADD",
-                        o1,
-                        o2,
-                        new QuantityDTO(2, o1.getUnit(), o1.getMeasurementType())
-                );
-            }
-
-           
-            public QuantityMeasurementEntity add(QuantityDTO o1, QuantityDTO o2, String targetUnit) {
-                return new QuantityMeasurementEntity(
-                        "ADD",
-                        o1,
-                        o2,
-                        new QuantityDTO(2, targetUnit, o1.getMeasurementType())
-                );
-            }
-
-            @Override
-            public QuantityMeasurementEntity subtract(QuantityDTO o1, QuantityDTO o2) {
-                return new QuantityMeasurementEntity(
-                        "SUBTRACT",
-                        o1,
-                        o2,
-                        new QuantityDTO(1, o1.getUnit(), o1.getMeasurementType())
-                );
-            }
-
-            public QuantityMeasurementEntity subtract(QuantityDTO o1, QuantityDTO o2, String targetUnit) {
-                return new QuantityMeasurementEntity(
-                        "SUBTRACT",
-                        o1,
-                        o2,
-                        new QuantityDTO(1, targetUnit, o1.getMeasurementType())
-                );
-            }
-
-            @Override
-            public QuantityMeasurementEntity divide(QuantityDTO o1, QuantityDTO o2) {
-                return new QuantityMeasurementEntity("DIVIDE", o1, o2, 1.0);
-            }
-        };
-
-        QuantityMeasurementController fakeController =
-                new QuantityMeasurementController(fakeService);
-
-        assertNotNull(fakeController);
+        Assertions.assertEquals(12.0, result.getValue(), 0.0001);
     }
 }

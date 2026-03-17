@@ -1,21 +1,28 @@
 package com.apps.quantitymeasurement.service;
-
 import com.apps.quantitymeasurement.dto.QuantityDTO;
-import com.apps.quantitymeasurement.entity.QuantityMeasurementEntity;
 
+import java.util.List;
+
+/**
+ * IQuantityMeasurementService
+ *
+ * Service contract for quantity measurement business operations.
+ *
+ * Responsibilities:
+ * - Compare quantities
+ * - Convert quantities
+ * - Expose historical persisted measurements
+ * - Keep controller independent of repository implementation
+ */
 public interface IQuantityMeasurementService {
 
-    QuantityMeasurementEntity compare(QuantityDTO operand1, QuantityDTO operand2);
+    boolean compare(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO);
 
-    QuantityMeasurementEntity convert(QuantityDTO operand1, String targetUnit);
+    QuantityDTO convert(QuantityDTO sourceQuantityDTO, QuantityDTO targetUnitDTO);
 
-    QuantityMeasurementEntity add(QuantityDTO operand1, QuantityDTO operand2);
+    List<String> getAllMeasurementHistory();
 
-    QuantityMeasurementEntity add(QuantityDTO operand1, QuantityDTO operand2, String targetUnit);
+    int getMeasurementCount();
 
-    QuantityMeasurementEntity subtract(QuantityDTO operand1, QuantityDTO operand2);
-
-    QuantityMeasurementEntity subtract(QuantityDTO operand1, QuantityDTO operand2, String targetUnit);
-
-    QuantityMeasurementEntity divide(QuantityDTO operand1, QuantityDTO operand2);
+    void deleteAllMeasurements();
 }

@@ -1,79 +1,68 @@
 package com.apps.quantitymeasurement;
-
-import com.apps.quantitymeasurement.controller.QuantityMeasurementController;
 import com.apps.quantitymeasurement.dto.QuantityDTO;
+import com.apps.quantitymeasurement.controller.QuantityMeasurementController;
 import com.apps.quantitymeasurement.repository.IQuantityMeasurementRepository;
 import com.apps.quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+import com.apps.quantitymeasurement.repository.QuantityMeasurementDatabaseRepository;
 import com.apps.quantitymeasurement.service.IQuantityMeasurementService;
 import com.apps.quantitymeasurement.service.QuantityMeasurementServiceImpl;
+import com.apps.quantitymeasurement.util.ApplicationConfig;
+import com.apps.quantitymeasurement.util.ConnectionPool;
 
+import java.util.logging.Logger;
+
+/**
+ * QuantityMeasurementApp
+ *
+ * Main application entry point for the Quantity Measurement Application.
+ *
+ * Responsibilities:
+ * - Bootstrap the application
+ * - Load configuration
+ * - Initialize correct repository implementation based on configuration
+ * - Wire repository, service, and controller layers
+ * - Demonstrate sample UC16 functionality
+ *
+ * Repository Modes:
+ * - cache
+ * - database
+ */
 public class QuantityMeasurementApp {
 
-    private static QuantityMeasurementApp instance;
-
-    private final IQuantityMeasurementRepository repository;
-    private final IQuantityMeasurementService service;
-    private final QuantityMeasurementController controller;
-
-    private QuantityMeasurementApp() {
-        this.repository = createRepository();
-        this.service = createService(repository);
-        this.controller = createController(service);
-    }
-
-    public static QuantityMeasurementApp getInstance() {
-        if (instance == null) {
-            instance = new QuantityMeasurementApp();
-        }
-        return instance;
-    }
-
-    private IQuantityMeasurementRepository createRepository() {
-        return QuantityMeasurementCacheRepository.getInstance();
-    }
-
-    private IQuantityMeasurementService createService(IQuantityMeasurementRepository repository) {
-        return new QuantityMeasurementServiceImpl(repository);
-    }
-
-    private QuantityMeasurementController createController(IQuantityMeasurementService service) {
-        return new QuantityMeasurementController(service);
-    }
-
-    public QuantityMeasurementController getController() {
-        return controller;
-    }
-
-    public IQuantityMeasurementRepository getRepository() {
-        return repository;
-    }
+    private static final Logger logger = Logger.getLogger(QuantityMeasurementApp.class.getName());
 
     public static void main(String[] args) {
-        QuantityMeasurementApp app = QuantityMeasurementApp.getInstance();
-        QuantityMeasurementController controller = app.getController();
+        ApplicationConfig config = ApplicationConfig.getInstance();
 
-        QuantityDTO oneFoot = new QuantityDTO(1.0, "FEET", "LENGTH");
-        QuantityDTO twelveInches = new QuantityDTO(12.0, "INCHES", "LENGTH");
+        IQuantityMeasurementRepository repository;
+        if ("database".equalsIgnoreCase(config.getRepositoryType())) {
+            repository = new QuantityMeasurementDatabaseRepository();
+            logger.info("Database repository selected.");
+        } else {
+            repository = new QuantityMeasurementCacheRepository();
+            logger.info("Cache repository selected.");
+        }
 
-        System.out.println("Length Equality:");
-        System.out.println(controller.performEquality(oneFoot, twelveInches));
+        IQuantityMeasurementService service = new QuantityMeasurementServiceImpl(repository);
+        QuantityMeasurementController controller = new QuantityMeasurementController(service);
 
-        System.out.println("\nLength Conversion:");
-        System.out.println(controller.performConversion(oneFoot, "INCHES"));
+        QuantityDTO quantityOne = new QuantityDTO(1.0, "FEET", "LengthUnit");
+        QuantityDTO quantityTwo = new QuantityDTO(12.0, "INCH", "LengthUnit");
 
-        System.out.println("\nLength Addition:");
-        System.out.println(controller.performAddition(oneFoot, twelveInches));
+        boolean comparisonResult = controller.performComparison(quantityOne, quantityTwo);
+        logger.info("Comparison Result: " + comparisonResult);
 
-        System.out.println("\nTemperature Addition Attempt:");
-        QuantityDTO temp1 = new QuantityDTO(0.0, "CELSIUS", "TEMPERATURE");
-        QuantityDTO temp2 = new QuantityDTO(32.0, "FAHRENHEIT", "TEMPERATURE");
-        System.out.println(controller.performAddition(temp1, temp2));
+        QuantityDTO source = new QuantityDTO(1.0, "FEET", "LengthUnit");
+        QuantityDTO target = new QuantityDTO(0.0, "INCH", "LengthUnit");
 
-        System.out.println("\nCross Category Prevention:");
-        QuantityDTO oneKg = new QuantityDTO(1.0, "KILOGRAM", "WEIGHT");
-        System.out.println(controller.performEquality(oneFoot, oneKg));
+        QuantityDTO convertedResult = controller.performConversion(source, target);
+        logger.info("Converted Result: " + convertedResult);
 
-        System.out.println("\nStored Measurements Count:");
-        System.out.println(app.getRepository().getAllMeasurements().size());
+        logger.info("Total Measurements Stored: " + controller.fetchMeasurementCount());
+        logger.info("Measurement History: " + controller.fetchMeasurementHistory());
+
+        if ("database".equalsIgnoreCase(config.getRepositoryType())) {
+            ConnectionPool.getInstance().shutdown();
+        }
     }
 }
