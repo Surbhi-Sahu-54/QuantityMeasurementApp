@@ -1,0 +1,73 @@
+package com.app.quantitymeasurement.repository;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.junit.jupiter.api.BeforeEach;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import com.app.quantitymeasurement.entity.QuantityMeasurementEntity;
+import com.app.quantitymeasurement.enums.OperationType;
+import com.app.quantitymeasurement.repository.IQuantityMeasurementRepository;
+
+/*
+ * =========================================================
+ * UC17 Repository Layer Test
+ * =========================================================
+ *
+ * Purpose:
+ * Verify database persistence using H2 in-memory DB.
+ */
+
+
+@DataJpaTest
+class QuantityMeasurementRepositoryTest {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(QuantityMeasurementRepositoryTest.class.getName());
+
+    @Autowired
+    private IQuantityMeasurementRepository repository;
+
+    @BeforeEach
+    void setup() {
+        logger.info("========== Repository Test Setup ==========");
+        logger.info("H2 database initialized");
+    }
+
+    /*
+     * =========================================================
+     * Test: Save Operation
+     * =========================================================
+     */
+
+    @Test
+    void testSaveMeasurement() {
+
+        logger.info("=========== START TEST: Save Entity ===========");
+
+        QuantityMeasurementEntity entity =
+                new QuantityMeasurementEntity(
+                        "Quantity(1,FEET)",
+                        "Quantity(12,INCHES)",
+                        OperationType.ADD,
+                        "Quantity(2,FEET)"
+                );
+
+        logger.info("STEP 1: Saving entity to repository");
+
+        QuantityMeasurementEntity saved =
+                repository.save(entity);
+
+        logger.info("STEP 2: Validating entity ID");
+
+        assertNotNull(saved.getId());
+
+        logger.info("RESULT: Entity saved successfully in H2 database");
+        logger.info("=========== TEST PASSED ===========");
+    }
+}
